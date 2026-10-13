@@ -1,0 +1,14 @@
+{
+  "name": "gkfarm-hwid-worker",
+  "version": "1.0.0",
+  "description": "GK FARM HWID Verification Server — Cloudflare Workers + D1",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 execute gkfarm-hwid --file=src/schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
