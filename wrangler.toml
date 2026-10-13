@@ -3,9 +3,11 @@ main = "src/index.js"
 compatibility_date = "2024-09-25"
 
 # ── Route: intercept yaelahky.com/api/* and /admin/* ──
-# After deploy, add Workers Routes in Cloudflare Dashboard:
-#   yaelahky.com/api/*   → gkfarm-hwid-worker
-#   yaelahky.com/admin/* → gkfarm-hwid-worker
+routes = [
+  { pattern = "yaelahky.com/api/*", zone_name = "yaelahky.com" },
+  { pattern = "yaelahky.com/admin/*", zone_name = "yaelahky.com" },
+  { pattern = "yaelahky.com/health", zone_name = "yaelahky.com" }
+]
 
 # ── D1 Database Binding ──
 [[d1_databases]]
@@ -18,5 +20,5 @@ database_id = "9d2f09b7-07a4-4904-a0e6-e4b85a9063eb"
 # Or in wrangler.toml for non-sensitive defaults:
 [vars]
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin123"
+ADMIN_PASSWORD = "19maret2003"
 # AUTH_SECRET → set via `wrangler secret put AUTH_SECRET` (do NOT put here)
