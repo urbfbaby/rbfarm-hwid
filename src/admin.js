@@ -59,7 +59,7 @@ export async function handleAdmin(request, env, path) {
 
         if (username === (env.ADMIN_USERNAME || 'admin') && password === (env.ADMIN_PASSWORD || 'admin123')) {
             const cookie = await createAuthCookie(env, isSecure);
-            return redirect('/admin', { 'Set-Cookie': cookie });
+            return redirect('/admin/', { 'Set-Cookie': cookie });
         }
         return redirect('/admin/login?error=1');
     }
@@ -75,7 +75,7 @@ export async function handleAdmin(request, env, path) {
     }
 
     // ── Dashboard ──
-    if (path === '/admin' && method === 'GET') {
+    if ((path === '/admin' || path === '/admin/') && method === 'GET') {
         const lics = await queryAll(env.DB, 'SELECT * FROM hwid_licenses ORDER BY created_at DESC');
         const stats = {
             total: lics.length,
@@ -91,16 +91,16 @@ export async function handleAdmin(request, env, path) {
     if (path === '/admin/hwid/add' && method === 'POST') {
         const body = await parseForm(request);
         const hwid = (body.hwid || '').trim();
-        if (!hwid) return redirect('/admin?error=HWID+is+required');
+        if (!hwid) return redirect('/admin/?error=HWID+is+required');
         try {
             await runSql(env.DB,
                 'INSERT INTO hwid_licenses (hwid, label, package, user_name, user_email, expired_at) VALUES (?, ?, ?, ?, ?, ?)',
                 [hwid, body.label || '', body.package || 'Lifetime', body.user_name || 'User', body.user_email || '', body.expired_at || null]
             );
-            return redirect('/admin?success=HWID+added');
+            return redirect('/admin/?success=HWID+added');
         } catch (e) {
             const msg = e.message.includes('UNIQUE') ? 'HWID+already+exists' : encodeURIComponent(e.message);
-            return redirect('/admin?error=' + msg);
+            return redirect('/admin/?error=' + msg);
         }
     }
 
@@ -111,7 +111,7 @@ export async function handleAdmin(request, env, path) {
             "UPDATE hwid_licenses SET status = ?, updated_at = datetime('now','localtime') WHERE id = ?",
             [body.status, body.id]
         );
-        return redirect('/admin');
+        return redirect('/admin/');
     }
 
     // ── Edit HWID ──
@@ -121,20 +121,20 @@ export async function handleAdmin(request, env, path) {
             "UPDATE hwid_licenses SET hwid=?, label=?, package=?, user_name=?, user_email=?, expired_at=?, status=?, updated_at=datetime('now','localtime') WHERE id=?",
             [body.hwid, body.label || '', body.package || 'Lifetime', body.user_name || '', body.user_email || '', body.expired_at || null, body.status || 'active', body.id]
         );
-        return redirect('/admin?success=HWID+updated');
+        return redirect('/admin/?success=HWID+updated');
     }
 
     // ── Delete HWID ──
     if (path === '/admin/hwid/delete' && method === 'POST') {
         const body = await parseForm(request);
         await runSql(env.DB, 'DELETE FROM hwid_licenses WHERE id = ?', [body.id]);
-        return redirect('/admin?success=HWID+deleted');
+        return redirect('/admin/?success=HWID+deleted');
     }
 
     // ── Clear logs ──
     if (path === '/admin/logs/clear' && method === 'POST') {
         await runSql(env.DB, 'DELETE FROM request_logs');
-        return redirect('/admin?success=Logs+cleared');
+        return redirect('/admin/?success=Logs+cleared');
     }
 
     // ── API: list HWIDs (JSON) ──
